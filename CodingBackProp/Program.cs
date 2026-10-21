@@ -7,11 +7,11 @@ namespace CodingBackProp
         {
             Console.WriteLine("\nBegin neural network back-propagation demo");
 
-            int numInput = 4; // number features
+            int numInput = 4;
             int numHidden = 5;
-            int numOutput = 3; // number of classes for Y
+            int numOutput = 3;
             int numRows = 1000;
-            int seed = 1; // gives nice demo
+            int seed = 1;
 
             Console.WriteLine("\nGenerating " + numRows +
               " artificial data items with " + numInput + " features");
@@ -19,7 +19,7 @@ namespace CodingBackProp
               numRows, seed);
             Console.WriteLine("Done");
 
-            //ShowMatrix(allData, allData.Length, 2, true);
+
 
             Console.WriteLine("\nCreating train (80%) and test (20%) matrices");
             double[][] trainData;
@@ -49,8 +49,7 @@ namespace CodingBackProp
             Console.WriteLine("\nFinal neural network model weights and biases:\n");
             ShowVector(weights, 2, 10, true);
 
-            //double[] y = nn.ComputeOutputs(new double[] { 1.0, 2.0, 3.0, 4.0 });
-            //ShowVector(y, 3, 3, true);
+
 
             double trainAcc = nn.Accuracy(trainData);
             Console.WriteLine("\nFinal accuracy on training data = " +
@@ -60,9 +59,9 @@ namespace CodingBackProp
             Console.WriteLine("Final accuracy on test data     = " +
               testAcc.ToString("F4"));
 
-            // ===== WHAT TO DO: cross entropy error and weight decay =====
+
             Console.WriteLine("\n==== Comparing training variations ====");
-            double weightDecay = 0.001; // regularization strength (try 0.0001 to 0.01)
+            double weightDecay = 0.001;
 
             string[] names = new string[] {
         "MSE, no weight decay",
@@ -94,7 +93,7 @@ namespace CodingBackProp
 
             Console.WriteLine("\nEnd back-propagation demo\n");
             Console.ReadLine();
-        } // Main
+        }
 
         public static void ShowMatrix(double[][] matrix, int numRows,
           int decimals, bool indices)
@@ -150,32 +149,32 @@ namespace CodingBackProp
             Random rnd = new Random(seed);
             int numWeights = (numInput * numHidden) + numHidden +
               (numHidden * numOutput) + numOutput;
-            double[] weights = new double[numWeights]; // actually weights & biases
+            double[] weights = new double[numWeights];
             for (int i = 0; i < numWeights; ++i)
-                weights[i] = 20.0 * rnd.NextDouble() - 10.0; // [-10.0 to 10.0]
+                weights[i] = 20.0 * rnd.NextDouble() - 10.0;
 
             Console.WriteLine("Generating weights and biases:");
             ShowVector(weights, 2, 10, true);
 
-            double[][] result = new double[numRows][]; // allocate return-result
+            double[][] result = new double[numRows][];
             for (int i = 0; i < numRows; ++i)
-                result[i] = new double[numInput + numOutput]; // 1-of-N in last column
+                result[i] = new double[numInput + numOutput];
 
             NeuralNetwork gnn =
-              new NeuralNetwork(numInput, numHidden, numOutput); // generating NN
+              new NeuralNetwork(numInput, numHidden, numOutput);
             gnn.SetWeights(weights);
 
-            for (int r = 0; r < numRows; ++r) // for each row
+            for (int r = 0; r < numRows; ++r)
             {
-                // generate random inputs
+
                 double[] inputs = new double[numInput];
                 for (int i = 0; i < numInput; ++i)
                     inputs[i] = 20.0 * rnd.NextDouble() - 10.0; // [-10.0 to -10.0]
 
-                // compute outputs
+
                 double[] outputs = gnn.ComputeOutputs(inputs);
 
-                // translate outputs to 1-of-N
+
                 double[] oneOfN = new double[numOutput]; // all 0.0
 
                 int maxIndex = 0;
@@ -190,22 +189,22 @@ namespace CodingBackProp
                 }
                 oneOfN[maxIndex] = 1.0;
 
-                // place inputs and 1-of-N output values into curr row
-                int c = 0; // column into result[][]
-                for (int i = 0; i < numInput; ++i) // inputs
+
+                int c = 0;
+                for (int i = 0; i < numInput; ++i)
                     result[r][c++] = inputs[i];
                 for (int i = 0; i < numOutput; ++i) // outputs
                     result[r][c++] = oneOfN[i];
-            } // each row
+            }
             return result;
-        } // MakeAllData
+        }
 
         static void SplitTrainTest(double[][] allData, double trainPct,
           int seed, out double[][] trainData, out double[][] testData)
         {
             Random rnd = new Random(seed);
             int totRows = allData.Length;
-            int numTrainRows = (int)(totRows * trainPct); // usually 0.80
+            int numTrainRows = (int)(totRows * trainPct);
             int numTestRows = totRows - numTrainRows;
             trainData = new double[numTrainRows][];
             testData = new double[numTestRows][];
@@ -408,12 +407,9 @@ namespace CodingBackProp
         public double[] Train(double[][] trainData, int maxEpochs,
           double learnRate, double momentum)
         {
-            // original version: mean squared error, no weight decay
             return Train(trainData, maxEpochs, learnRate, momentum, 0.0, false);
         }
 
-        // weightDecay: L2 regularization strength (0.0 = none)
-        // useCrossEntropy: false = mean squared error, true = cross entropy
         public double[] Train(double[][] trainData, int maxEpochs,
           double learnRate, double momentum, double weightDecay,
           bool useCrossEntropy)
@@ -440,7 +436,6 @@ namespace CodingBackProp
             double[] tValues = new double[numOutput]; // target values
             double derivative = 0.0;
             double errorSignal = 0.0;
-            // weight decay: each weight is shrunk slightly on every update
             double decayFactor = 1.0 - (learnRate * weightDecay);
 
             int[] sequence = new int[trainData.Length];
@@ -476,7 +471,6 @@ namespace CodingBackProp
                         errorSignal = tValues[k] - outputs[k];  // Wikipedia uses (o-t)
                         if (useCrossEntropy)
                         {
-                            // softmax + cross entropy: the derivative term cancels out
                             oSignals[k] = errorSignal;
                         }
                         else
@@ -524,7 +518,7 @@ namespace CodingBackProp
                         for (int j = 0; j < numHidden; ++j)
                         {
                             double delta = ihGrads[i][j] * learnRate;
-                            ihWeights[i][j] *= decayFactor; // weight decay
+                            ihWeights[i][j] *= decayFactor;
                             ihWeights[i][j] += delta; // would be -= if (o-t)
                             ihWeights[i][j] += ihPrevWeightsDelta[i][j] * momentum;
                             ihPrevWeightsDelta[i][j] = delta; // save for next time
@@ -546,7 +540,7 @@ namespace CodingBackProp
                         for (int k = 0; k < numOutput; ++k)
                         {
                             double delta = hoGrads[j][k] * learnRate;
-                            hoWeights[j][k] *= decayFactor; // weight decay
+                            hoWeights[j][k] *= decayFactor;
                             hoWeights[j][k] += delta;
                             hoWeights[j][k] += hoPrevWeightsDelta[j][k] * momentum;
                             hoPrevWeightsDelta[j][k] = delta;
@@ -582,7 +576,7 @@ namespace CodingBackProp
 
         private double Error(double[][] trainData)
         {
-            return Error(trainData, 0.0, false); // original MSE, no penalty
+            return Error(trainData, 0.0, false);
         }
 
         private double Error(double[][] trainData, double weightDecay,
@@ -612,7 +606,6 @@ namespace CodingBackProp
             }
             double meanError = sumSquaredError / trainData.Length;
 
-            // weight decay adds a penalty on large weights: (decay/2) * sum(w^2)
             double penalty = 0.0;
             if (weightDecay > 0.0)
             {
